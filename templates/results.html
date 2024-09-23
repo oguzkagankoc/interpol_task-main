@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+  <head>
+    <script>
+    // Function to check for new data
+    function checkNewData() {
+        fetch('/check_new_data')  // Send a request to the server to check for new data
+            .then(response => response.json())  // Parse the response as JSON
+            .then(data => {
+                if (data.has_new_data_added) {
+                    alert('New data added!');  // Display an alert if new data is added
+                }
+                if (data.has_new_data_deleted) {
+                    alert('Data deleted!');  // Display an alert if data is deleted
+                }
+                if (data.has_new_data_changed) {
+                    alert('Data changed!');  // Display an alert if data is changed
+                }
+            })
+            .catch(error => {
+                console.log(error);  // Log any errors that occur during the request
+            });
+    }
+
+    // Call the checkNewData function every 3 seconds
+    setInterval(checkNewData, 3000);
+    </script>
+    <title>Results</title>
+    <!-- Styling for table elements -->
+    <style>
+      table {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      td, th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      th {
+        text-align: left;
+        background-color: #f2f2f2;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+      /* Styling for pagination links */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .pagination a {
+        margin: 0 5px;
+        padding: 5px 10px;
+        background-color: #f2f2f2;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-decoration: none;
+        color: #555;
+      }
+      .pagination a.active {
+        background-color: #4CAF50;
+        color: white;
+      }
+      .pagination a.disabled {
+        background-color: #ddd;
+        color: #aaa;
+        pointer-events: none;
+        cursor: default;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Table for displaying data -->
+    <table>
+      <tr>
+        <th>Entity ID</th>
+        <th>Forename</th>
+        <th>Name</th>
+        <th>Sex ID</th>
+        <th>Date of Birth</th>
+        <th>Place of Birth</th>
+        <th>Country of Birth ID</th>
+        <th>Weight</th>
+        <th>Height</th>
+        <th>Distinguishing Marks</th>
+        <th>Eyes Colors ID</th>
+        <th>Hairs ID</th>
+        <th>Is Active</th>
+        <th>Thumbnail</th>
+      </tr>
+      <!-- Loop through each person's data and add a row to the table -->
+      {% for person in pagination.items %}
+      <tr>
+        <td><a href="{{ url_for('person_details', entity_id=person.entity_id) }}">{{ person.entity_id }}</a></td>
+        <td>{{ person.forename }}</td>
+        <td>{{ person.name }}</td>
+        <td>{{ person.sex_id }}</td>
+        <td>{{ person.date_of_birth }}</td>
+        <td>{{ person.place_of_birth }}</td>
+        <td>{{ person.country_of_birth_id }}</td>
+        <td>{{ person.weight }}</td>
+        <td>{{ person.height }}</td>
+        <td>{{ person.distinguishing_marks }}</td>
+        <td>{{ person.eyes_colors_id }}</td>
+        <td>{{ person.hairs_id }}</td>
+        <td>{{ person.is_active }}</td>
+        <td class="thumbnail">{{ person.thumbnail }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <!-- Pagination links -->
+    <div class="pagination">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('results', page=pagination.prev_num) }}">Previous</a>
+      {% endif %}
+      <!-- Loop through page numbers and create pagination links -->
+      {% for num in pagination.iter_pages(left_edge=1, left_current=1, right_current=2, right_edge=1) %}
+      {% if num %}
+      {% if num != pagination.page %}
+      <a href="{{ url_for('results', page=num) }}">{{ num }}</a>
+      {% else %}
+      <span>{{ num }}</span>
+      {% endif %}
+      {% else %}
+      <span class="ellipsis">&#8230;</span>
+      {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('results', page=pagination.next_num) }}">Next</a>
+      {% endif %}
+    </div>
+    <script>
+  // Select all td elements
+  const tds = document.querySelectorAll('.thumbnail');
+  // For each td element
+  tds.forEach(td => {
+    // Decode content from base64
+    const base64 = td.textContent;
+    const image = new Image();
+    image.src = "data:image/jpeg;base64," + base64;
+    // Create a new img element and append it to the td
+    td.innerHTML = '';
+    td.appendChild(image);
+  });
+    </script>
+  </body>
+</html>
